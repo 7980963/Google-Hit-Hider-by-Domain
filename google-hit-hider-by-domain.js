@@ -2,10 +2,10 @@
 // @name        Google Hit Hider by Domain 汉化版
 // @author      Jefferson "jscher2000" Scher ,7980963
 // @namespace   JeffersonScher
-// @version     2.2.4.1
+// @version     2.2.6.3
 // @copyright   Copyright 2023 Jefferson Scher
 // @license     BSD-3-Clause
-// @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.2.4 2023-01-01
+// @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.2.6 2023-05-13
 // @include     http*://www.google.*/*
 // @exclude http*://www.google.com/recaptcha/*
 // @include     http*://www.google.co*.*/*
@@ -39,21 +39,21 @@
 // @grant       GM.getResourceUrl
 // @resource    mycon https://www.jeffersonscher.com/gm/src/gfrk-GHHbD-ver224.png
 // ==/UserScript==
-var script_about = "https://greasyfork.org/scripts/1682-google-hit-hider-by-domain-search-filter-block-sites";
+var script_about = "https://greasyfork.org/zh-CN/scripts/457749-google-hit-hider-by-domain-%E6%B1%89%E5%8C%96%E7%89%88";
 /*
 Copyright (c) 2023 Jefferson Scher.
- 
+
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met and subject to the following restriction:
- 
+
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
- 
+
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
- 
+
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
- 
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
- 
+
 var GM4 = (typeof GM.getValue === "undefined") ? false : true;
 function GHHbD_addStyle(txt){
     var s=document.createElement('style');
@@ -61,7 +61,7 @@ function GHHbD_addStyle(txt){
     s.appendChild(document.createTextNode(txt));
     document.body.appendChild(s);
 }
-var isch = false;
+var isch = false, nws = false;
 function injectBaseCSS(){
     // == == == To override the style of the script's buttons and panes, use the custom style feature == == ==
     GHHbD_addStyle("div.ghhider{color:#888;} div.ghhider:hover{background-color:#eee;} " +
@@ -92,9 +92,17 @@ function injectBaseCSS(){
         document.body.appendChild(ghhbd_imgsty);
         isch=true;
     }
+    if (location.search.indexOf("tbm=nws") > -1){ //v2.2.6 for News results under www
+        var ghhbd_nwssty = document.createElement("style");
+        ghhbd_nwssty.id = "ghhStyleNwsResults";
+        ghhbd_nwssty.setAttribute("type", "text/css");
+        ghhbd_nwssty.appendChild(document.createTextNode('.ghhb{position:relative; top: -22px; float:right;} g-scrolling-carousel .ghhb{position:static !important; float:none;}'));
+        document.body.appendChild(ghhbd_nwssty);
+        nws=true;
+    }
 }
 injectBaseCSS();
- 
+
 var currentG = location.hostname; var engine = 'misc';
 function doSiteSpecific(){
     if (currentG.indexOf("google") > -1){
@@ -116,6 +124,8 @@ function doSiteSpecific(){
                        ".results_links_deep[blocknotice] + .results__sitelink--organics, .ghhdnone + .results__sitelink--organics, .results_links_deep[blocknotice] + .result__sitelinks--organics, .ghhdnone + .result__sitelinks--organics {display:none;}");
         // v2.2.3 2022-05-02: div#links > div.nrn-react-div > article > div > h2 > a
         //   not sure what CSS changes might be needed yet
+                // v2.2.5 2023-05-13: ol.react-results--main > li[data-layout="organic"] > article[data-testid="result"][data-nrn="result"] > div > h2 > a
+                GHHbD_addStyle('li[blocknotice] .ghhider.ghhd{padding-left:10px !important;} li[ghhresult="unset"] h2 > a{display:inline-block !important;}');
     }
     if (currentG.indexOf("startpage") > -1){
         engine = 'Startpage';
@@ -160,7 +170,7 @@ function doSiteSpecific(){
     }
 }
 doSiteSpecific();
- 
+
 function injectCustom(){
     if (document.getElementById("ghhbdcuststy")) return;
     var ghhbd_custsty = document.createElement("style");
@@ -169,7 +179,7 @@ function injectCustom(){
     ghhbd_custsty.appendChild(document.createTextNode(custSty));
     document.body.appendChild(ghhbd_custsty);
 }
- 
+
 var custSty;
 if (!GM4){
     custSty = GM_getValue("hiderStyles", "");
@@ -177,48 +187,48 @@ if (!GM4){
 } else {
     GM.getValue("hiderStyles", "").then(function(value){custSty = value; if (custSty.length > 0) injectCustom();});
 }
- 
+
 // == == == Globals for preferences == == ==
 var blist, defaultTxts, txtsPref, txts, defaultPrefs, ghhPrefs, ghhPrefO, showYN, mpopen, mbstyle, bbstyle, bbpos, addAt, listchgs, bLUopen, bAggress, bAJAX, bMutOb, pref1click, betatest, MutOb, chgMon, opts, kids, needupdate = true, doms = [], t_pb;
 var patIPv4 = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
- 
+
 function checkblist(){
     if (blist.length === 0) blist = "|example.com:t|";
     if (blist.substr(0,1) != "|") blist = "|" + blist;
     if (blist.indexOf(":") < 0) convertFormat();
 }
- 
+
 if (!GM4){
     blist = GM_getValue("hideyhosts", "");
     checkblist();
 } else {
     GM.getValue("hideyhosts", "").then(function(value){blist = value; checkblist();});
 }
- 
+
 defaultTxts = {
-    "block":["拦截","Button next to the result title to call up the block dialog"],
-    "unblock":["取消拦截","Green button in results to remove a site from the block list"],
-    "onetime":["临时显示","Yellow button in results to show a result temporarily"],
-    "pban":["永久禁止","Red button to move a site to the perma-ban list"],
-    "shownotc":["显示通知","Button to set the preference for notices to show them"],
-    "hidenotc":["隐藏通知","Button to set the preference for notices to hide them"],
-    "okbtn":["拦截网站","Button in the block dialog to block the selected domain"],
-    "cancelbtn":["取消","Button in the block dialog to cancel out with making changes"],
-    "savebtn":["保存列表","Button in the management pane to update the block and perma-ban lists"],
-    "closebtn":["关闭","Button in the management pane to close the pane"],
-    "okPbtn":["永久拦截","Button in the block dialog to perma-ban the selected domain"],
-    "cancelMbtn":["设置","Button in the block dialog to open the management pane"],
-    "mngbtn":["Manage Hiding","Button on the right side to open the management pane"],
-    "eximbtn":["导出","Button in the management pane to export the block list"],
-    "utilbtn":["工具列表","Button in the management pane to open the utility panel"],
-    "sortbtn":["排序","Button in the management pane to sort the block list"],
-    "unwwwbtn":["删除www","Button in the management pane to strip www from blocked domains"],
-    "dedupbtn":["删除重复","Button in the management pane to de-duplicate the block list"],
-    "impobtn":["导入","Button in the management pane to import domains into the block list"],
-    "sharebtn":["导出","Button in the management pane to post block list to the web"],
-    "addallbtn":["添加所有","Button in the management pane to bulk add all unblocked domains to current list"]
+    "block": ["屏蔽", "在结果标题旁边的按钮，可呼出屏蔽对话框"],
+    "unblock": ["解除屏蔽", "在结果中的绿色按钮，可将网站从屏蔽列表中移除"],
+    "onetime": ["临时显示", "在结果中的黄色按钮，可暂时显示一个结果"],
+    "pban": ["永久屏蔽", "将网站移到永久屏蔽列表中的红色按钮"],
+    "shownotc": ["显示通知", "设置是否显示通知的按钮"],
+    "hidenotc": ["隐藏通知", "设置是否隐藏通知的按钮"],
+    "okbtn": ["常规屏蔽", "在屏蔽对话框中屏蔽所选域名的按钮"],
+    "cancelbtn": ["取消", "在屏蔽对话框中取消更改的按钮"],
+    "savebtn": ["保存列表", "在管理面板中更新屏蔽和永久屏蔽列表的按钮"],
+    "closebtn": ["关闭", "在管理面板中关闭面板的按钮"],
+    "okPbtn": ["永久屏蔽", "在屏蔽对话框中永久屏蔽所选域名的按钮"],
+    "cancelMbtn": ["管理隐藏", "在屏蔽对话框中打开管理面板的按钮"],
+    "mngbtn": ["Manage Hiding", "Button on the right side to open the management pane"],
+    "eximbtn": ["导出", "在管理面板中导出屏蔽列表的按钮"],
+    "utilbtn": ["列表工具", "在管理面板中打开实用程序面板的按钮"],
+    "sortbtn": ["排序", "在管理面板中对屏蔽列表进行排序的按钮"],
+    "unwwwbtn": ["去除www", "在管理面板中从被屏蔽的域名中去除www的按钮"],
+    "dedupbtn": ["去重", "在管理面板中对屏蔽列表进行去重的按钮"],
+    "impobtn": ["导入", "在管理面板中将域名导入屏蔽列表的按钮"],
+    "sharebtn": ["分享", "在管理面板中将屏蔽列表发布到网络的按钮"],
+    "addallbtn": ["全部添加", "在管理面板中批量添加所有未屏蔽的域名到当前列表的按钮"]
 };
- 
+
 function checktxts(){
     if (txtsPref.indexOf(":[") == -1 || txtsPref.indexOf("mngbtn") == -1 ||
         txtsPref.indexOf("eximbtn") == -1 || txtsPref.indexOf("utilbtn") == -1 ||
@@ -228,14 +238,14 @@ function checktxts(){
         txts = JSON.parse(txtsPref);
     }
 }
- 
+
 if (!GM4){
     txtsPref = GM_getValue("textstrings", JSON.stringify(defaultTxts));
     checktxts();
 } else {
     GM.getValue("textstrings", JSON.stringify(defaultTxts)).then(function(value){txtsPref = value; checktxts();});
 }
- 
+
 defaultPrefs = {
     "shownotc":["Y","Show hit notices(Y|N)"],
     "mngpaneopen":["Y-N","Persistence enabled(Y|N),Pane was open(Y|N),Last tab number(1-4)"],
@@ -247,7 +257,7 @@ defaultPrefs = {
     "runbeta":["N","Enable incompletely tested features (Y|N)"],
     "reserved2":["X","Y"]
 };
- 
+
 function checkprefs(){
     if (ghhPrefs.length == 0){
         convertPrefs(defaultPrefs, "true");
@@ -259,7 +269,7 @@ function checkprefs(){
         }
     }
 }
- 
+
 if (!GM4){
     ghhPrefs = GM_getValue("ghhprefs", "");
     checkprefs();
@@ -267,7 +277,7 @@ if (!GM4){
 } else {
     GM.getValue("ghhprefs", "").then(function(value){ghhPrefs = value; checkprefs(); GHHbDinit();});
 }
- 
+
 function GHHbDinit(){
     showYN = ghhPrefO.shownotc[0];
     mpopen = ghhPrefO.mngpaneopen[0];
@@ -336,7 +346,7 @@ function GHHbDinit(){
         if (bAJAX == "on") setMutationWatch();
     }
 }
- 
+
 function setMutationWatch(){
     // Prefer MutationObserver (Firefox 14+) over Mutation Events
     MutOb = (window.MutationObserver) ? window.MutationObserver : window.WebKitMutationObserver;
@@ -374,7 +384,7 @@ var ignoreNodeNames = "|BODY|#text|#comment|INPUT|BUTTON|SCRIPT|LI|A|FORM|";
 var ignoreIds = "|leftnav|leftnavc|foot|ghhtemp|ghhblockform|ghhmanageform|ghhsitelist|ghhpbanlist|rhs|rhscol|";
 var ignoreClass = "|ghhider|ghhdbuttons|ghh1time|";
 var t_ap, t_gimg;
- 
+
 function checkOlist(e){ // Check for new results // Needed for Baidu
     var el = e.target;
     // Ignore events on some elements
@@ -409,7 +419,9 @@ function checkNode(el){
         el.nodeName == 'G-INNER-CARD' || el.nodeName == 'G-CARD' || el.classList.contains("isv-r")) var nlist = [el];
     else nlist = el.querySelectorAll('li.g, div.g, div.rg_di, div.isv-r');
     if (engine != 'Google' && el.nodeName != "LI"){
-        if (el.nodeName == "DIV" && (el.classList.contains("result--web") || el.classList.contains("result--news") || el.className == "card-mobile" || el.classList.contains('nrn-react-div'))) nlist = [el]; // Qwant, Ecosia, DDG-react
+        if (el.nodeName == "DIV" && (el.classList.contains("result--web") || el.classList.contains("result--news") ||
+                                     el.className == "card-mobile" || el.classList.contains('nrn-react-div'))) nlist = [el]; // Qwant, Ecosia, DDG-react
+        else if (el.nodeName == "OL" && el.classList.contains('react-results--main')) nlist = el.querySelectorAll('li');
         else nlist = el.querySelectorAll('div.result, div.result-op, div.links_main, div.serp-item, div.hd, li.b_algo, ol.list-flat > li, div.card-web div.card-mobile');
     }
     if (nlist.length > 0){
@@ -459,8 +471,9 @@ function hidehits(liels,ovrd){
         if (engine == 'Google'){
             liels = document.querySelectorAll("#res li.g, #res div.srg div.g, #res div._NId div.g, #res div._bkWMgd div.g, #res #rso div.g, #res #GTR div.g, #res #isr_mc, g-section-with-header g-scrolling-carousel g-inner-card, g-card div.dbsr, g-card, [data-async-context^=\"query:\"] div.g");
         } else {
-            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.card-web div.card-mobile');
+            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.card-web div.card-mobile, ol.react-results--main > li');
         }
+        if (nws == true) liels = document.querySelectorAll('#res #rso div[class][data-hveid]'); //v2.2.6 for News results under www
         if (!liels) return;
     }
     if (isch && liels.length==0){
@@ -469,7 +482,7 @@ function hidehits(liels,ovrd){
         if (engine == 'Google'){
             liels = document.querySelectorAll("#res li.g, #res div.srg div.g, #res div._NId div.g, #res div._bkWMgd div.g, #res #rso div.g, #res #GTR div.g, #res #isr_mc, g-section-with-header g-scrolling-carousel g-inner-card, g-card div.dbsr, g-card, [data-async-context^=\"query:\"] div.g");
         } else {
-            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.card-web div.card-mobile');
+            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.card-web div.card-mobile, ol.react-results--main > li');
         }
     }
     if (liels.length == 0) return;
@@ -796,6 +809,8 @@ function replaceHit(sdomain,oa,oli,ddis){
     dnew = document.createElement("div");
     if (oa.querySelector('h3')){
         dnew.appendChild(document.createTextNode(oa.querySelector('h3').textContent+" on "+sdomain));
+    } else if (nws == true && oa.querySelector('div[role="heading"]')) { //v2.2.6 for News results under www
+        dnew.appendChild(document.createTextNode(oa.querySelector('div[role="heading"]').textContent+" on "+sdomain));
     } else if (oli.nodeName === 'G-INNER-CARD' || oli.nodeName === 'G-CARD' || oli.className === 'dbsr'){
         if (oa.children[1]) dnew.appendChild(document.createTextNode(oa.children[1].textContent+" on "+sdomain));
         else if (oa.children[0] && oa.children[0].children[1] && oa.children[0].children[1].children[1]) dnew.appendChild(document.createTextNode(oa.children[0].children[1].children[1].textContent+" on "+sdomain));
@@ -909,6 +924,7 @@ function reshow(e){ // Show hit without unblocking
     // Hide notice, move action buttons, then show hit
     e.target.style.display="none";
     ael = liel.querySelector("div.r > a, h3 a, .c-result-content a");
+    if (!ael && engine == 'DDG') ael = liel.querySelector('article h2 > a');
     if (!ael && engine == 'Baidu' && liel.hasAttribute('mu')) ael = liel.querySelector("p.op_site_domain_title, div.op_generalqa_main.c-row").firstChild;
     if (!ael) ael = liel.querySelector("span.tl a"); // summarized news result
     if (!ael) ael = liel.querySelector("a"); // other
@@ -1096,22 +1112,22 @@ function addBlockForm(){
     var bfd = document.createElement("div");
     bfd.id = "ghhblockform";
     bfd.className = "ghhpane";
-    var bfdcode = '<form onsubmit="return false;"><p style="margin:0.75em 0;"><strong>添加到拦截列表：</strong></p><p><label ' +
-        'style="white-space:pre"><input type="radio" name="ghhdom" value="f"> <span id="ghhfulldom"></span></label><br>' +
-        '<label><input type="radio" name="ghhdom" value="p"> <span id="ghhpartdom"></span>  <button type="button" id="ghhdomadj" ' +
-        'title="Adjust partial domain" style="position: absolute; right: 1em; padding: 0 1px;">~</button></label></p>' +
-        '<p style="text-align:center;white-space:pre;line-height:2em;margin:0.75em 0"><button type="button" id="ghhbf1" bt="t"> ' +
-        txts.okbtn[0] + ' </button> <button type="button" id="ghhbf3" bt="p"> ' + txts.okPbtn[0] + ' </button><br>' +
-        '<button type="button" id="ghhbf2" mng="N"> ' + txts.cancelbtn[0] + ' </button> ' +
-        '<button type="button" id="ghhbf4" mng="Y">' + txts.cancelMbtn[0] + '</button></p>';
-    if (engine == 'Google'){
-        bfdcode += "<p style=\"border-top:1px solid #aaa;text-align:center;white-space:pre;line-height:2em;margin:0.75em 0;padding-top:0.5em;\">Edit query: <button type=\"button\" id=\"ghhbf5\" title=\"This site only\"> +site: </button> " +
-            "<button type=\"button\" id=\"ghhbf6\" title=\"Exclude this site\"> -site: </button></p>";
-    }
-    bfdcode += "<p style=\"margin:0.75em 0;\"><label title=\"Switch between showing and hiding result titles for regular blocked hits\"><input " +
-    "type=\"checkbox\" name=\"chkshownotcbf\" id=\"chkshownotcbf\"> 显示拦截通知</label><br>" +
-        "<label title=\"Switch between block dialog and one-click blocking\"><input type=\"checkbox\" name=\"chk1clickbf\" " +
-        "id=\"chk1clickbf\"> 启动快速拦截模式</label></p></form>";
+    var bfdcode = '<form onsubmit="return false;"><p style="margin:0.75em 0;"><strong>添加至屏蔽列表：</strong></p><p><label ' +
+    'style="white-space:pre"><input type="radio" name="ghhdom" value="f"> <span id="ghhfulldom"></span></label><br>' +
+    '<label><input type="radio" name="ghhdom" value="p"> <span id="ghhpartdom"></span>  <button type="button" id="ghhdomadj" ' +
+    'title="调整部分域名" style="position: absolute; right: 1em; padding: 0 1px;">~</button></label></p>' +
+    '<p style="text-align:center;white-space:pre;line-height:2em;margin:0.75em 0"><button type="button" id="ghhbf1" bt="t"> ' +
+    txts.okbtn[0] + ' </button> <button type="button" id="ghhbf3" bt="p"> ' + txts.okPbtn[0] + ' </button><br>' +
+    '<button type="button" id="ghhbf2" mng="N"> ' + txts.cancelbtn[0] + ' </button> ' +
+    '<button type="button" id="ghhbf4" mng="Y">' + txts.cancelMbtn[0] + '</button></p>';
+if (engine == 'Google'){
+    bfdcode += "<p style=\"border-top:1px solid #aaa;text-align:center;white-space:pre;line-height:2em;margin:0.75em 0;padding-top:0.5em;\">编辑查询: <button type=\"button\" id=\"ghhbf5\" title=\"仅限此网站\"> +site: </button> " +
+        "<button type=\"button\" id=\"ghhbf6\" title=\"排除此网站\"> -site: </button></p>";
+}
+bfdcode += "<p style=\"margin:0.75em 0;\"><label title=\"切换显示或隐藏常规屏蔽结果标题\"><input " +
+    "type=\"checkbox\" name=\"chkshownotcbf\" id=\"chkshownotcbf\"> 显示隐藏提示</label><br>" +
+    "<label title=\"切换屏蔽对话框和一键屏蔽\"><input type=\"checkbox\" name=\"chk1clickbf\" " +
+    "id=\"chk1clickbf\"> 启用一键屏蔽</label></p></form>";
     bfd.innerHTML = bfdcode;
     document.body.appendChild(bfd);
     document.getElementById("ghhbf1").addEventListener("click",addblock,false);
@@ -1451,81 +1467,81 @@ function addManageForm(){
     mfd.setAttribute("style","display:none;");
     mfd.innerHTML = "<form onsubmit=\"return false;\"><div id=\"ghhtsdiv\">" +
         "<p style=\"margin:6px 0 -1px 0\" id=\"ghhtstrip\">" +
-        "<button type=\"button\" id=\"ghhts1\" title=\"General Use and Notices\">主页</button>" +
-        "<button type=\"button\" id=\"ghhts2\" title=\"Regular Block List\">常规拦截</button>" +
-        "<button type=\"button\" id=\"ghhts3\" title=\"Perma-ban List\">永久拦截</button>" +
-        "<button type=\"button\" id=\"ghhts4\" title=\"Manage Script Options\">选项</button></p></div>" +
+        "<button type=\"button\" id=\"ghhts1\" title=\"常规使用和通知\">首页</button>" +
+        "<button type=\"button\" id=\"ghhts2\" title=\"常规屏蔽列表\">常规屏蔽</button>" +
+        "<button type=\"button\" id=\"ghhts3\" title=\"永久屏蔽列表\">永久屏蔽</button>" +
+        "<button type=\"button\" id=\"ghhts4\" title=\"管理脚本选项\">选项</button></p></div>" +
         "<div id=\"mflists\" style=\"width:230px\">" +
-        "<div id=\"ghhmt1\"><p>欢迎使用Google Hit Hider！ <a href=\"https://www.jeffersonscher.com/gm/google-hit-hider/\" " +
-        "style=\"float:right;\" target=\"_blank\" title=\"Documentation\">JS</a></p>" +
+        "<div id=\"ghhmt1\"><p>欢迎使用 Google Hit Hider！ <a href=\"https://www.jeffersonscher.com/gm/google-hit-hider/\" " +
+        "style=\"float:right;\" target=\"_blank\" title=\"文档\">JS</a></p>" +
         "<div class=\"ghhtab\">" +
         "<p style=\"padding:0.25em;margin:0.25em\">点击这个在标题旁的按钮 ( <button type=\"button\" class=\"ghhider\" onclick=\"return false;\">" + txts.block[0] + "</button> ) " +
-        "，来拦截该网站的搜索结果。 一个被 <b>常规拦截</b> 的网站显示为单行网址， " +
-        "而一个被 <b>永久拦截</b> 的网站会消失。</p>" +
-        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\"><label title=\"Switch between showing and hiding result titles " +
-        "for regular blocked hits\"><input type=\"checkbox\" name=\"chkshownotc\" id=\"chkshownotc\"> 显示拦截通知</label><br>" +
-        "<label title=\"Switch between block dialog and one-click blocking\"><input type=\"checkbox\" name=\"chk1click\" " +
-        "id=\"chk1click\"> 启动快速拦截模式</label></p>" +
-        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\">v2.2.3 &copy; 2022 Jefferson Scher.  " +
-        "<a href=\"" + script_about + "\">点击此处</a>了解更多。</p></div></div>" +
-        "<div id=\"ghhmt2\" style=\"display:none\"><p>点击以从常规拦截列表中删除：</p>" +
+        "，来屏蔽该网站的搜索结果。 一个被 <b>常规屏蔽</b> 的网站显示为单行网址， " +
+        "而一个被 <b>永久屏蔽</b> 的网站会消失。</p>" +
+        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\"><label title=\"切换显示或隐藏常规屏蔽结果的标题" +
+        "for regular blocked hits\"><input type=\"checkbox\" name=\"chkshownotc\" id=\"chkshownotc\"> 显示屏蔽通知</label><br>" +
+        "<label title=\"切换屏蔽对话框和一键屏蔽\"><input type=\"checkbox\" name=\"chk1click\" " +
+        "id=\"chk1click\"> 启用一键屏蔽</label></p>" +
+        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\">v2.2.6 &copy; 2023 Jefferson Scher. 了解更多信息，请访问" +
+        "<a href=\"" + script_about + "\">此脚本页面</a>.</p></div></div>" +
+        "<div id=\"ghhmt2\" style=\"display:none\"><p>单击以从常规屏蔽列表中删除：</p>" +
         "<div class=\"ghhtab\"><ul id=\"ghhsitelist\"></ul></div></div>\n" +
-        "<div id=\"ghhmt3\" style=\"display:none\"><p>点击以从永久拦截列表中删除：</p>" +
+        "<div id=\"ghhmt3\" style=\"display:none\"><p>单击以从永久屏蔽列表中删除：</p>" +
         "<div class=\"ghhtab\"><ul id=\"ghhpbanlist\"></ul></div></div>" +
         "<div id=\"ghhmt4\" style=\"display:none\"><p>脚本管理选项：</p>" +
         "<div class=\"ghhtab\" id=\"btnedit\">" +
-        "<p id=\"addradios\">添加新阻止的域名：<br>" +
-        "<label><input type=\"radio\" name=\"addpos\" value=\"end\"> 在尾部添加</label><br>" +
-        "<label><input type=\"radio\" name=\"addpos\" value=\"top\"> 在头部添加</label><br>" +
-        "<label><input type=\"radio\" name=\"addpos\" value=\"sort\"> 按字母排序</label></p>" +
-        "<p id=\"aggressrads\" style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">默认拦截方式：<br>" +
-        "<label><input type=\"radio\" name=\"agglevel\" value=\"none\"> 始终拦截所有域名</label><br>" +
-        "<label><input type=\"radio\" name=\"agglevel\" value=\"all\"> 始终拦截部分域名</label><br>" +
-        "<label><input type=\"radio\" name=\"agglevel\" value=\"www\"> 仅拦截 www 域名</label></p>" +
-        "<p id=\"btnradios\" style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">User interface style:<br>" +
-        "<label><input type=\"radio\" name=\"uistyle\" value=\"both\"> Show Manage Hiding &amp; " + txts.block[0] + "</label><br>" +
-        "<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"checkbox\" name=\"mbiframe\" id=\"mbiframe\"> Manage Hiding in iframes</label><br>" +
-        "<label title=\"You can click a " + txts.block[0] + " button to open this dialog\"><input type=\"radio\" name=\"uistyle\" value=\"blk\"> Hide Manage Hiding button</label><br>" +
-        "<label title=\"" + txts.block[0] + " buttons will appear only when this dialog is displayed\"><input type=\"radio\" name=\"uistyle\" value=\"mng\"> Hide " + txts.block[0] + " buttons</label><br>" +
-        "<span style=\"display:inline-block;margin-top:4px;\">Manage Hiding button position:</span><br>" +
-        "<label><input type=\"radio\" name=\"mngbtnpos\" value=\"R\"> Side</label> " +
-        "<label><input type=\"radio\" name=\"mngbtnpos\" value=\"T\"> Top</label> " +
-        "<label><input type=\"radio\" name=\"mngbtnpos\" value=\"B\"> Bottom</label><br>" +
-        "<span style=\"display:inline-block;margin-top:4px;\">Block button position <i>(reloads)</i>:</span><br>" +
-        "<label><input type=\"radio\" name=\"blockposit\" value=\"H\"> Headline</label> " +
-        "<label><input type=\"radio\" name=\"blockposit\" value=\"C\"> Cite line</label><br>" +
-        "<span style=\"display:inline-block;margin-top:4px;\">Display block buttons:</span><br>" +
-        "<label><input type=\"radio\" name=\"blockdisp\" value=\"P\"> Always</label> " +
-        "<label><input type=\"radio\" name=\"blockdisp\" value=\"M\"> On Mouseover</label><br>" +
-        "<span style=\"display:inline-block;margin-top:4px;\">Block button tooltips:</span><br>" +
-        "<label><input type=\"radio\" name=\"blockttip\" value=\"Y\"> Full Detail</label> " +
-        "<label><input type=\"radio\" name=\"blockttip\" value=\"N\"> None</label></p>" +
-        "<p id=\"miscpref\" style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">Misc Preferences:<br>" +
-        "<label><input type=\"checkbox\" name=\"chkajax\" id=\"chkajax\"> Instant/AJAX/Autopager</label><br>" +
-        "<label><input type=\"checkbox\" name=\"chkdom4\" id=\"chkdom4\"> DOM4 Mutation Observer</label><br>" +
-        "<label><input type=\"checkbox\" name=\"chkmpopen\" id=\"chkmpopen\"> Re-open Management Pane</label><br>" +
-        "<label><input type=\"checkbox\" name=\"chk1pban\" id=\"chk1pban\"> 1-click to Perma-ban list</label><br>" +
-        "<label title=\"Try out features that haven't been completely tested\"><input type=\"checkbox\" name=\"chkbeta\" " +
-        "id=\"chkbeta\"> Enable beta features</label></p>" +
-        "<p style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">Edit captions:</p>" +
+        "<p id=\"addradios\">添加新屏蔽的域名：<br>" +
+        "<label><input type=\"radio\" name=\"addpos\" value=\"end\"> 添加到列表末尾</label><br>" +
+        "<label><input type=\"radio\" name=\"addpos\" value=\"top\"> 添加到列表顶部</label><br>" +
+        "<label><input type=\"radio\" name=\"addpos\" value=\"sort\"> 按字母顺序排序</label></p>" +
+        "<p id=\"aggressrads\" style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">默认屏蔽方式：<br>" +
+        "<label><input type=\"radio\" name=\"agglevel\" value=\"none\"> 始终完整域名</label><br>" +
+        "<label><input type=\"radio\" name=\"agglevel\" value=\"all\"> 始终部分域名</label><br>" +
+        "<label><input type=\"radio\" name=\"agglevel\" value=\"www\"> 仅对www使用部分域名</label></p>" +
+        "<p id=\"btnradios\" style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">用户界面风格：<br>" +
+        "<label><input type=\"radio\" name=\"uistyle\" value=\"both\">显示Manage Hiding" + "和" + txts.block[0] + "按钮" + "</label><br>" +
+        "<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"checkbox\" name=\"mbiframe\" id=\"mbiframe\">在 iframe 中隐藏该按钮</label><br>" +
+        "<label title=\"您可以单击" + txts.block[0] + "按钮打开此对话框\"><input type=\"radio\" name=\"uistyle\" value=\"blk\">隐藏Manage Hiding按钮</label><br>" +
+        "<label title=\"" + txts.block[0] + "按钮仅在显示此对话框时显示\"><input type=\"radio\" name=\"uistyle\" value=\"mng\">隐藏" + txts.block[0] + "按钮</label><br>" +
+        "<span style=\"display:inline-block;margin-top:4px;\">Manage Hiding 按钮位置：</span><br>" +
+        "<label><input type=\"radio\" name=\"mngbtnpos\" value=\"R\"> 侧面</label> " +
+        "<label><input type=\"radio\" name=\"mngbtnpos\" value=\"T\"> 顶部</label> " +
+        "<label><input type=\"radio\" name=\"mngbtnpos\" value=\"B\"> 底部</label><br>" +
+        "<span style=\"display:inline-block;margin-top:4px;\">屏蔽按钮位置<i>（重新加载）</i>：</span><br>" +
+        "<label><input type=\"radio\" name=\"blockposit\" value=\"H\"> 标题行</label> " +
+        "<label><input type=\"radio\" name=\"blockposit\" value=\"C\"> 引用行</label><br>" +
+        "<span style=\"display:inline-block;margin-top:4px;\">显示屏蔽按钮：</span><br>" +
+        "<label><input type=\"radio\" name=\"blockdisp\" value=\"P\"> 总是</label> " +
+        "<label><input type=\"radio\" name=\"blockdisp\" value=\"M\"> 鼠标悬停时</label><br>" +
+        "<span style=\"display:inline-block;margin-top:4px;\">屏蔽按钮工具提示：</span><br>" +
+        "<label><input type=\"radio\" name=\"blockttip\" value=\"Y\"> 完整详情</label> " +
+        "<label><input type=\"radio\" name=\"blockttip\" value=\"N\"> 无</label></p>" +
+        "<p id=\"miscpref\" style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">其他设置：<br>" +
+        "<label><input type=\"checkbox\" name=\"chkajax\" id=\"chkajax\"> 即时/AJAX/自动分页</label><br>" +
+        "<label><input type=\"checkbox\" name=\"chkdom4\" id=\"chkdom4\"> DOM4 变化观察器</label><br>" +
+        "<label><input type=\"checkbox\" name=\"chkmpopen\" id=\"chkmpopen\"> 重启管理面板</label><br>" +
+        "<label><input type=\"checkbox\" name=\"chk1pban\" id=\"chk1pban\"> 一键永久禁止列表</label><br>" +
+        "<label title=\"尝试尚未完全测试的功能\"><input type=\"checkbox\" name=\"chkbeta\" " +
+        "id=\"chkbeta\"> 启用测试功能</label></p>" +
+        "<p style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">编辑说明文字：</p>" +
         "<p><button type=\"button\" class=\"ghhider\" id=\"ghhedit1\" key=\"block\">" + txts.block[0] + "</button> " +
         "<button type=\"button\" class=\"ghhider\" id=\"ghhedit3\" key=\"unblock\" style=\"background:#9f6\">" + txts.unblock[0] + "</button> " +
         "<button type=\"button\" class=\"ghhider\" id=\"ghhedit2\" key=\"pban\" style=\"background:#f66\">" + txts.pban[0] + "</button></p>" +
-        "<p><i>Reload to complete changes</i></p><p><button type=\"button\" id=\"ghhmfr\">Restore default captions</button></p>" +
-        "<p style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">Custom style rules:<br>" +
-        "<button type=\"button\" id=\"ghhecsr\">Edit Custom Style Rules</button></p></div></div>" +
+        "<p><i>重新加载以完成更改</i></p><p><button type=\"button\" id=\"ghhmfr\">恢复默认说明文字</button></p>" +
+        "<p style=\"border-top:1px solid #000;padding-top:0.25em;margin-bottom:8px\">自定义样式规则：<br>" +
+        "<button type=\"button\" id=\"ghhecsr\">编辑自定义样式规则</button></p></div></div>" +
         "</div><p style=\"text-align:center;white-space:pre;margin:1em 0\">" +
         "<button type=\"button\" id=\"ghhmf1\">" + txts.savebtn[0] + "<span id=\"numchgs\"></span></button> " +
-        "<button type=\"button\" id=\"ghhmf3\" title=\"Display additional buttons for list management\">工具列表" +
+        "<button type=\"button\" id=\"ghhmf3\" title=\"显示列表管理的其他按钮\">列表工具" +
         "<div style=\"display:inline;font-size:0.9em;color:#888\"><span id=\"ghhdowntriangle\">&#9660;</span>" +
         "<span id=\"ghhuptriangle\" style=\"display:none\">&#9650;</span></div></button> " +
         "<button type=\"button\" id=\"ghhmf2\">" + txts.closebtn[0] + "</button></p><p id=\"ghhutil\" style=\"display:none\">" +
-        "<button type=\"button\" id=\"ghhmf4\" title=\"Display block list for copying to backup or share\">" +
-        txts.eximbtn[0] + "</button> <button type=\"button\" id=\"ghhmf7\" title=\"Import domains to the block list\">" +
-        txts.impobtn[0] + "</button> <button type=\"button\" id=\"ghhmf8\" title=\"Add all domains on this page to current list\">" +
-        txts.addallbtn[0] + "</button><br /><button type=\"button\" id=\"ghhmf5\" title=\"Sort list in alphabetical order\">" +
-        txts.sortbtn[0] + "</button> <button type=\"button\" id=\"ghhmf6\" title=\"De-duplicate block list by removing unnecessary domains\">" +
-        txts.dedupbtn[0] + "</button> <button type=\"button\" id=\"ghhmf9\" title=\"Remove www from blocked domains\">" +
+        "<button type=\"button\" id=\"ghhmf4\" title=\"显示可复制备份或共享的阻止列表\">" +
+        txts.eximbtn[0] + "</button> <button type=\"button\" id=\"ghhmf7\" title=\"将域名导入阻止列表\">" +
+        txts.impobtn[0] + "</button> <button type=\"button\" id=\"ghhmf8\" title=\"将此页面上的所有域名添加到当前列表\">" +
+        txts.addallbtn[0] + "</button><br /><button type=\"button\" id=\"ghhmf5\" title=\"按字母顺序排序\">" +
+        txts.sortbtn[0] + "</button> <button type=\"button\" id=\"ghhmf6\" title=\"通过删除不必要的域名对阻止列表进行去重\">" +
+        txts.dedupbtn[0] + "</button> <button type=\"button\" id=\"ghhmf9\" title=\"从被阻止的域名中移除 www\">" +
         txts.unwwwbtn[0] + "</button></p></form>";
     document.body.appendChild(mfd);
     fixShowHideBtn();
@@ -2221,10 +2237,10 @@ async function resetTextStrings(e){ // Reset buttons captions to defaults
 async function exportlist(e){ // Display and populate export form, clean up from any prior use
     if (!document.getElementById("ghhexport")) insertExportForm();
     var expDiv = document.getElementById("ghhexport");
-    document.getElementById("ghheximhead").innerHTML = "导出拦截列表";
-    document.getElementById("ghheximinfo1").innerHTML = "这里显示当前的拦截列表。 " +
-        "<button type=\"button\" id=\"expgotopreimp\" style=\"display:none\">Show old block list (prior to last import)</button><br /><br />" +
-        "左侧列表显示的是原始格式。保存此列表，您可以保留常规拦截/永久拦截的设置。" +
+    document.getElementById("ghheximhead").innerHTML = "导出屏蔽列表";
+    document.getElementById("ghheximinfo1").innerHTML = "这里显示当前的屏蔽列表。 " +
+        "<button type=\"button\" id=\"expgotopreimp\" style=\"display:none\">这里显示旧的屏蔽列表（最后一次导入之前）</button><br /><br />" +
+        "左侧列表显示的是原始格式。保存此列表，您可以保留常规屏蔽/永久屏蔽的设置。" +
         "<br /><br />右边是一个简单的域名列表。这样可以很方便的和他人共享。";
     if (!GM4){
         var currlist = GM_getValue("hideyhosts");
