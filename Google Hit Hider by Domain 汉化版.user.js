@@ -2,10 +2,10 @@
 // @name        Google Hit Hider by Domain 汉化版
 // @author      Jefferson "jscher2000" Scher ,7980963
 // @namespace   JeffersonScher
-// @version     2.2.8.2
+// @version     2.3.1.1
 // @copyright   Copyright 2023 Jefferson Scher
 // @license     BSD-3-Clause
-// @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.2.7 2023-05-28
+// @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.3.1 2024-05-11
 // @include     http*://www.google.*/*
 // @exclude http*://www.google.com/recaptcha/*
 // @include     http*://www.google.co*.*/*
@@ -14,6 +14,8 @@
 // @include     http*://startpage.com/*
 // @include     http*://*.startpage.com/*
 // @exclude https://www.startpage.com/*/ads?*
+// @exclude https://www.startpage.com/*/*/ads*
+// @exclude https://us-browse.startpage.com/av/proxy?*
 // @include     http*://duckduckgo.com/*
 // @include     http*://start.duckduckgo.com/*
 // @include     http*://safe.duckduckgo.com/*
@@ -37,11 +39,13 @@
 // @grant       GM.deleteValue
 // @grant       GM_getResourceURL
 // @grant       GM.getResourceUrl
-// @resource    mycon https://www.jeffersonscher.com/gm/src/gfrk-GHHbD-ver224.png
+// @resource    mycon https://www.jeffersonscher.com/gm/src/gfrk-GHHbD-ver231.png
+// @downloadURL https://update.greasyfork.org/scripts/457749/Google%20Hit%20Hider%20by%20Domain%20%E6%B1%89%E5%8C%96%E7%89%88.user.js
+// @updateURL https://update.greasyfork.org/scripts/457749/Google%20Hit%20Hider%20by%20Domain%20%E6%B1%89%E5%8C%96%E7%89%88.meta.js
 // ==/UserScript==
 var script_about = "https://greasyfork.org/zh-CN/scripts/457749-google-hit-hider-by-domain-%E6%B1%89%E5%8C%96%E7%89%88";
 /*
-Copyright (c) 2023 Jefferson Scher.
+Copyright (c) 2024 Jefferson Scher.
  
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met and subject to the following restriction:
  
@@ -122,19 +126,23 @@ function doSiteSpecific(){
         engine = 'DDG';
         // DuckDuckGo: div#links > div.results_links_deep > div.links_main > h2 > a
         GHHbD_addStyle(".links_main, .result__title{overflow:visible !important;} .result__title{white-space:nowrap !important;} " +
-                       ".ghhb{font-size:12px!important;margin-left:4px!important;} " +
+                       ".ghhb{font-size:12px!important;margin-left:4px!important;position:absolute;margin-top:4px!important} " +
                        ".results_links_deep[blocknotice] + .results__sitelink--organics, .ghhdnone + .results__sitelink--organics, .results_links_deep[blocknotice] + .result__sitelinks--organics, .ghhdnone + .result__sitelinks--organics {display:none;}");
         // v2.2.3 2022-05-02: div#links > div.nrn-react-div > article > div > h2 > a
         //   not sure what CSS changes might be needed yet
-                // v2.2.5 2023-05-13: ol.react-results--main > li[data-layout="organic"] > article[data-testid="result"][data-nrn="result"] > div > h2 > a
-                GHHbD_addStyle('li[blocknotice] .ghhider.ghhd{padding-left:10px !important;} li[ghhresult="unset"] h2 > a{display:inline-block !important;}');
+        // v2.2.5 2023-05-13: ol.react-results--main > li[data-layout="organic"] > article[data-testid="result"][data-nrn="result"] > div > h2 > a
+        GHHbD_addStyle('li[blocknotice] .ghhider.ghhd{padding-left:10px !important;} li[ghhresult="unset"] h2 > a{display:inline-block !important;}');
     }
     if (currentG.indexOf("startpage") > -1){
         engine = 'Startpage';
         // Startpage: div#results > ol > li > div.result > h3 > a
         // 11/21/2018: [data-view="results"] div.columns article.column.column--main > div.column.column--main__content > ol.list-flat > li.search-result.search-item > h3.search-item__title > a
         //  7/03/2019: div.mainline-results__web section.w-gl > div.w-gl__result > a.w-gl__result-title
-        GHHbD_addStyle('.w-gl__result{overflow:visible !important;} .ghhd{padding:0 10px 8px 12px}button.ghhider{font-weight:normal}#ghhblockform input[type="checkbox"], #ghhmngform input[type="checkbox"]{width:unset;height:unset;position:static;margin:unset;border:unset;padding:unset;clip:unset;}' +
+        //  5/08/2024: div#main > div.w-gl > div.result > a.result-title.result-link, div#main > div.w-bg > div.result > div.result__main > a.result-title.result-link
+        GHHbD_addStyle('.w-gl__result{overflow:visible !important;} @media(min-width: 651px){div.w-gl .result, div.w-bg .result{position:relative!important;}' +
+                       '.result button.ghhb{position:absolute;right:-30px;margin-top:-28px;} .result .result__main button.ghhb{margin-top:26px;}}' +
+                       'div.w-gl__result .ghhd{padding:0 10px 8px 12px}button.ghhider{font-weight:normal;}' +
+                       '#ghhblockform input[type="checkbox"], #ghhmngform input[type="checkbox"]{width:unset;height:unset;position:static;margin:unset;border:unset;padding:unset;clip:unset;}' +
                        '#ghhblockform button, #ghhmngform button{font-size:1em;font-weight:normal;border:1px solid #e3e3e3;border-radius:3px;padding:2px 8px;box-shadow:none} #ghhmngform{top:105px !important;}');
     }
     if (currentG.indexOf("yahoo.com") > -1){
@@ -275,9 +283,15 @@ function checkprefs(){
 if (!GM4){
     ghhPrefs = GM_getValue("ghhprefs", "");
     checkprefs();
-    GHHbDinit();
+    if (engine == 'Startpage') window.setTimeout(GHHbDinit, 300);
+    else GHHbDinit();
 } else {
-    GM.getValue("ghhprefs", "").then(function(value){ghhPrefs = value; checkprefs(); GHHbDinit();});
+    GM.getValue("ghhprefs", "").then(function(value){
+      ghhPrefs = value;
+      checkprefs();
+      if (engine == 'Startpage') window.setTimeout(GHHbDinit, 300);
+      else GHHbDinit();
+    });
 }
  
 function GHHbDinit(){
@@ -473,7 +487,7 @@ function hidehits(liels,ovrd){
         if (engine == 'Google'){
             liels = document.querySelectorAll("#res li.g, #res div.srg div.g, #res div._NId div.g, #res div._bkWMgd div.g, #res #rso div.g, #res #GTR div.g, #res #isr_mc, g-section-with-header g-scrolling-carousel g-inner-card, g-card div.dbsr, g-card, [data-async-context^=\"query:\"] div.g");
         } else {
-            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.card-web div.card-mobile, ol.react-results--main > li');
+            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.w-gl > div.result, div.w-bg > div.result, div.card-web div.card-mobile, ol.react-results--main > li');
         }
         if (nws == true) liels = document.querySelectorAll('#res #rso div[class][data-hveid]'); //v2.2.6 for News results under www
         if (!liels) return;
@@ -484,7 +498,7 @@ function hidehits(liels,ovrd){
         if (engine == 'Google'){
             liels = document.querySelectorAll("#res li.g, #res div.srg div.g, #res div._NId div.g, #res div._bkWMgd div.g, #res #rso div.g, #res #GTR div.g, #res #isr_mc, g-section-with-header g-scrolling-carousel g-inner-card, g-card div.dbsr, g-card, [data-async-context^=\"query:\"] div.g");
         } else {
-            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.card-web div.card-mobile, ol.react-results--main > li');
+            liels = document.querySelectorAll('div#results li, div#results > div.result, div#links > div.results_links_deep > div.links_main, div#links > div.nrn-react-div, div#b_content ol > li.b_algo, div#results div#web > ol > li, div#WS2m > div.w, div.sw-CardBase, div.serp-list > div.serp-item, ul.serp-list > li.serp-item, div#main_results > div.result, div.results-column div.result--web, div.results-column div.result--news, #content_left > div.result.c-container, #content_left > div.result-op.c-container, ol.list-flat > li, div.w-gl__result, div.w-gl > div.result, div.w-bg > div.result, div.card-web div.card-mobile, ol.react-results--main > li');
         }
     }
     if (liels.length == 0) return;
@@ -502,6 +516,7 @@ function hidehits(liels,ovrd){
                                                         liels[i].nodeName === 'G-INNER-CARD' || liels[i].nodeName === 'G-CARD')) ||
              (liels[i].parentNode.nodeName == "DIV" && liels[i].closest('#rso, [data-async-context^="query:"]') !== null) ||
              (engine != 'Google' && liels[i].parentNode.nodeName == "DIV") ||
+             (engine == 'Startpage' && liels[i].classList.contains("result")) ||
              liels[i].classList.contains('serp-item')) &&
             liels[i].className.indexOf("gbt")!=0 &&
             liels[i].classList.contains("gplusgrid") === false &&
@@ -670,8 +685,12 @@ function hidehits(liels,ovrd){
                                 apar.style.overflow = "visible";
                                 apar.appendChild(btn);
                                 // full link text tooltip
-                                if (engine == 'Yahoo' && apar.querySelector('a').childNodes[0].nodeName == 'SPAN') apar.querySelector('a').setAttribute("title",apar.querySelector('a').childNodes[1].textContent); 
-                                else apar.querySelector('a').setAttribute("title",apar.querySelector('a').textContent); 
+                                if (engine == 'Yahoo' && apar.querySelector('a').childNodes[0].nodeName == 'SPAN') apar.querySelector('a').setAttribute("title",apar.querySelector('a').childNodes[1].textContent);
+                                else if (engine == 'Startpage' && apar.nodeName == 'A') {
+                                  apar.parentNode.insertBefore(btn, apar.nextSibling);
+                                  apar.setAttribute("title",apar.firstElementChild.textContent);
+                                }
+                                else apar.querySelector('a').setAttribute("title",apar.querySelector('a').textContent);
                             } else if (apar.parentNode.parentNode.nodeName == 'G-CARD'){
                                 apar.parentNode.appendChild(btn);
                                 apar.parentNode.parentNode.style.overflowY = 'visible';
@@ -1106,7 +1125,7 @@ function rehide(e){
         // TODO notice is disappearing on Bing -- temporarily, do not move/remove the buttons div
         liel.querySelector('div.ghhd > div.ghhdbuttons').style.display = 'none';
     }
-    ael = liel.querySelector("h3 a, h2 a");
+    ael = liel.querySelector("h3 a, h2 a, a h2, a h3");
     if (!ael) ael = liel.querySelector("a");
     liel.classList.remove('ghh1time');
     replaceHit(dompart,ael,liel,"");
@@ -1394,9 +1413,9 @@ function addMngBtn(){
     mbtn = document.createElement("button");
     mbtn.appendChild(document.createTextNode(txts.mngbtn[0]));
     mbtn.className="ghhider unbtn";
-    mbtn.setAttribute("title","Manage Google Hit Hider Settings");
+    mbtn.setAttribute("title","Manage Google Hit Hider Settings / Ctrl+click to re-hide");
     mbtn.id = "ghhMngBtn";
-    mbtn.addEventListener("click",showManageForm,true);
+    mbtn.addEventListener("click",handleManageButton,true);
     document.body.appendChild(mbtn);
 }
 function undupMngBtn(){
@@ -1404,6 +1423,16 @@ function undupMngBtn(){
     while (unbtns.length > 1){
         unbtns[unbtns.length - 1].parentNode.removeChild(unbtns[unbtns.length - 1]);
     }
+}
+function handleManageButton(e){
+  if (e.ctrlKey){
+    var btnM = e.target;
+    btnM.style.backgroundColor = 'aqua';
+    hidehits(null, false);
+    window.setTimeout(function(){btnM.style.backgroundColor = ''}, 250);
+  } else {
+    showManageForm(e);
+  }
 }
 async function showManageForm(e){
     if (window.self != window.top) return;
