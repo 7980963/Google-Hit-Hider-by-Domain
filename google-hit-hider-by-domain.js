@@ -2,7 +2,7 @@
 // @name        Google Hit Hider by Domain 汉化版
 // @author      Jefferson "jscher2000" Scher ,7980963
 // @namespace   JeffersonScher
-// @version     2.2.7.1
+// @version     2.2.8.2
 // @copyright   Copyright 2023 Jefferson Scher
 // @license     BSD-3-Clause
 // @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.2.7 2023-05-28
@@ -81,8 +81,9 @@ function injectBaseCSS(){
                    "#ghhtstrip button{color:#555;background-color:#f5f5f5;margin:0 2px 0 0;border:1px solid #ccc;padding:1px 2px;height:22px;border-radius:2px;} " +
                    "#ghhtstrip .ghhCurTab{background-color:#fcfcfc;border-bottom-color:#fcfcfc;} .ghhtab {margin-top:1em;height:17em;overflow-y:scroll;border:1px solid #333;} " +
                    "#mflists>div>p{margin:1em 0;} #ghhmngform{position:fixed;top:65px;right:0;z-index:9001;text-align:left;line-height:1.2em} #ghhblockform{text-align:left;z-index:3005} " +
-                   'h3[wotdonut="true"]{overflow:visible!important}');
-    GHHbD_addStyle("@media print {button.ghhider{display:none;}}");
+                   'h3[wotdonut="true"]{overflow:visible!important} div.divGHHbD{text-align:right;align-self:flex-end;padding:4px;} ' +
+                   'button.imgGHHbD{position:relative;z-index:1000;color:#609beb;background-color:#333;border:1px solid #609beb;} button.imgGHHbD:hover{background-color:#000;color:#0ee;}');
+    GHHbD_addStyle("@media print {button.ghhider,button.imgGHHbD{display:none;}}");
     // Standard image results style block
     if (location.search.indexOf("tbm=isch") > -1){
         var ghhbd_imgsty = document.createElement("style");
@@ -453,8 +454,8 @@ function checkNode(el){
         if (alnk && !alnk.parentNode.hasAttribute('ghhresult')) {
             alnk.parentNode.setAttribute('ghhresult', 'image-unset');
             var dnew = document.createElement("div");
-            dnew.setAttribute('style', 'text-align: right');
-            dnew.innerHTML = '<button type="button" title="Block/Unblock" url="' + alnk.href + '" style="position:relative; top: 5em; right: 6px; z-index: 1000; color: #609beb; background-color: #333; border: 1px solid  #609beb;">GHHbD</button>';
+            dnew.classList.add('divGHHbD'); // v2.2.8 update horizontal position for flex layout, move styling to classes
+            dnew.innerHTML = '<button type="button" title="Block/Unblock" url="' + alnk.href + '" class="imgGHHbD">GHHbD</button>';
             alnk.parentNode.insertBefore(dnew, alnk);
             dnew.firstChild.addEventListener("click", imgblockdialog, false);
         }
@@ -1490,7 +1491,7 @@ function addManageForm(){
         "for regular blocked hits\"><input type=\"checkbox\" name=\"chkshownotc\" id=\"chkshownotc\"> 显示屏蔽通知</label><br>" +
         "<label title=\"切换屏蔽对话框和一键屏蔽\"><input type=\"checkbox\" name=\"chk1click\" " +
         "id=\"chk1click\"> 启用一键屏蔽</label></p>" +
-        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\">v2.2.6 &copy; 2023 Jefferson Scher. 了解更多信息，请访问" +
+        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\">v2.2.8 &copy; 2023 Jefferson Scher. 了解更多信息，请访问" +
         "<a href=\"" + script_about + "\">此脚本页面</a>.</p></div></div>" +
         "<div id=\"ghhmt2\" style=\"display:none\"><p>单击以从常规屏蔽列表中删除：</p>" +
         "<div class=\"ghhtab\"><ul id=\"ghhsitelist\"></ul></div></div>\n" +
