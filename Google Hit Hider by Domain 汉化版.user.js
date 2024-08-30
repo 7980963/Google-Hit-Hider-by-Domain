@@ -2,7 +2,7 @@
 // @name        Google Hit Hider by Domain 汉化版
 // @author      Jefferson "jscher2000" Scher ,7980963
 // @namespace   JeffersonScher
-// @version     2.3.1.1
+// @version     2.3.1.2
 // @copyright   Copyright 2023 Jefferson Scher
 // @license     BSD-3-Clause
 // @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.3.1 2024-05-11
@@ -1520,7 +1520,7 @@ function addManageForm(){
         "for regular blocked hits\"><input type=\"checkbox\" name=\"chkshownotc\" id=\"chkshownotc\"> 显示屏蔽通知</label><br>" +
         "<label title=\"切换屏蔽对话框和一键屏蔽\"><input type=\"checkbox\" name=\"chk1click\" " +
         "id=\"chk1click\"> 启用一键屏蔽</label></p>" +
-        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\">v2.2.8 &copy; 2023 Jefferson Scher. 了解更多信息，请访问" +
+        "<p style=\"border-top:1px solid #000; padding:0.25em;margin:0.25em\">v2.3.1 &copy; 2024 Jefferson Scher. 了解更多信息，请访问" +
         "<a href=\"" + script_about + "\">此脚本页面</a>.</p></div></div>" +
         "<div id=\"ghhmt2\" style=\"display:none\"><p>单击以从常规屏蔽列表中删除：</p>" +
         "<div class=\"ghhtab\"><ul id=\"ghhsitelist\"></ul></div></div>\n" +
