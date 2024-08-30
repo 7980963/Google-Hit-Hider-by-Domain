@@ -2,7 +2,7 @@
 // @name        Google Hit Hider by Domain 汉化版
 // @author      Jefferson "jscher2000" Scher ,7980963
 // @namespace   JeffersonScher
-// @version     2.3.1.2
+// @version     2.3.1.3
 // @copyright   Copyright 2023 Jefferson Scher
 // @license     BSD-3-Clause
 // @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.3.1 2024-05-11
@@ -40,8 +40,6 @@
 // @grant       GM_getResourceURL
 // @grant       GM.getResourceUrl
 // @resource    mycon https://www.jeffersonscher.com/gm/src/gfrk-GHHbD-ver231.png
-// @downloadURL https://update.greasyfork.org/scripts/457749/Google%20Hit%20Hider%20by%20Domain%20%E6%B1%89%E5%8C%96%E7%89%88.user.js
-// @updateURL https://update.greasyfork.org/scripts/457749/Google%20Hit%20Hider%20by%20Domain%20%E6%B1%89%E5%8C%96%E7%89%88.meta.js
 // ==/UserScript==
 var script_about = "https://greasyfork.org/zh-CN/scripts/457749-google-hit-hider-by-domain-%E6%B1%89%E5%8C%96%E7%89%88";
 /*
