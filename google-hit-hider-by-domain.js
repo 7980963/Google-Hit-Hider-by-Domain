@@ -2,10 +2,10 @@
 // @name        Google Hit Hider by Domain 汉化版
 // @author      Jefferson "jscher2000" Scher ,7980963
 // @namespace   JeffersonScher
-// @version     2.2.6.3
+// @version     2.2.7.1
 // @copyright   Copyright 2023 Jefferson Scher
 // @license     BSD-3-Clause
-// @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.2.6 2023-05-13
+// @description 从Google、DuckDuckGo、Startpage.com、Bing和Yahoo搜索结果中屏蔽不需要的站点。 v2.2.7 2023-05-28
 // @include     http*://www.google.*/*
 // @exclude http*://www.google.com/recaptcha/*
 // @include     http*://www.google.co*.*/*
@@ -42,18 +42,18 @@
 var script_about = "https://greasyfork.org/zh-CN/scripts/457749-google-hit-hider-by-domain-%E6%B1%89%E5%8C%96%E7%89%88";
 /*
 Copyright (c) 2023 Jefferson Scher.
-
+ 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met and subject to the following restriction:
-
+ 
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
+ 
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
+ 
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
+ 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
+ 
 var GM4 = (typeof GM.getValue === "undefined") ? false : true;
 function GHHbD_addStyle(txt){
     var s=document.createElement('style');
@@ -102,7 +102,7 @@ function injectBaseCSS(){
     }
 }
 injectBaseCSS();
-
+ 
 var currentG = location.hostname; var engine = 'misc';
 function doSiteSpecific(){
     if (currentG.indexOf("google") > -1){
@@ -114,6 +114,7 @@ function doSiteSpecific(){
     if (currentG.indexOf("bing.com") > -1){
         engine = 'Bing';
         // Bing: div#b_content > main > ol#b-results > li.b_algo > h2 > a
+        // [as of v2.2.7 5/28/2023] true URL found in li.b_algo > div:not(.b_algo_group) cite
         GHHbD_addStyle("li[ghhresult] h2 button.ghhider{font-size:0.7em !important;} li > h2 {white-space:nowrap !important;}");
     }
     if (currentG.indexOf("duckduckgo") > -1 || currentG.indexOf("3g2upl4pq6kufc4m") > -1){
@@ -170,7 +171,7 @@ function doSiteSpecific(){
     }
 }
 doSiteSpecific();
-
+ 
 function injectCustom(){
     if (document.getElementById("ghhbdcuststy")) return;
     var ghhbd_custsty = document.createElement("style");
@@ -179,7 +180,7 @@ function injectCustom(){
     ghhbd_custsty.appendChild(document.createTextNode(custSty));
     document.body.appendChild(ghhbd_custsty);
 }
-
+ 
 var custSty;
 if (!GM4){
     custSty = GM_getValue("hiderStyles", "");
@@ -187,24 +188,24 @@ if (!GM4){
 } else {
     GM.getValue("hiderStyles", "").then(function(value){custSty = value; if (custSty.length > 0) injectCustom();});
 }
-
+ 
 // == == == Globals for preferences == == ==
 var blist, defaultTxts, txtsPref, txts, defaultPrefs, ghhPrefs, ghhPrefO, showYN, mpopen, mbstyle, bbstyle, bbpos, addAt, listchgs, bLUopen, bAggress, bAJAX, bMutOb, pref1click, betatest, MutOb, chgMon, opts, kids, needupdate = true, doms = [], t_pb;
 var patIPv4 = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
-
+ 
 function checkblist(){
     if (blist.length === 0) blist = "|example.com:t|";
     if (blist.substr(0,1) != "|") blist = "|" + blist;
     if (blist.indexOf(":") < 0) convertFormat();
 }
-
+ 
 if (!GM4){
     blist = GM_getValue("hideyhosts", "");
     checkblist();
 } else {
     GM.getValue("hideyhosts", "").then(function(value){blist = value; checkblist();});
 }
-
+ 
 defaultTxts = {
     "block": ["屏蔽", "在结果标题旁边的按钮，可呼出屏蔽对话框"],
     "unblock": ["解除屏蔽", "在结果中的绿色按钮，可将网站从屏蔽列表中移除"],
@@ -228,7 +229,7 @@ defaultTxts = {
     "sharebtn": ["分享", "在管理面板中将屏蔽列表发布到网络的按钮"],
     "addallbtn": ["全部添加", "在管理面板中批量添加所有未屏蔽的域名到当前列表的按钮"]
 };
-
+ 
 function checktxts(){
     if (txtsPref.indexOf(":[") == -1 || txtsPref.indexOf("mngbtn") == -1 ||
         txtsPref.indexOf("eximbtn") == -1 || txtsPref.indexOf("utilbtn") == -1 ||
@@ -238,14 +239,14 @@ function checktxts(){
         txts = JSON.parse(txtsPref);
     }
 }
-
+ 
 if (!GM4){
     txtsPref = GM_getValue("textstrings", JSON.stringify(defaultTxts));
     checktxts();
 } else {
     GM.getValue("textstrings", JSON.stringify(defaultTxts)).then(function(value){txtsPref = value; checktxts();});
 }
-
+ 
 defaultPrefs = {
     "shownotc":["Y","Show hit notices(Y|N)"],
     "mngpaneopen":["Y-N","Persistence enabled(Y|N),Pane was open(Y|N),Last tab number(1-4)"],
@@ -257,7 +258,7 @@ defaultPrefs = {
     "runbeta":["N","Enable incompletely tested features (Y|N)"],
     "reserved2":["X","Y"]
 };
-
+ 
 function checkprefs(){
     if (ghhPrefs.length == 0){
         convertPrefs(defaultPrefs, "true");
@@ -269,7 +270,7 @@ function checkprefs(){
         }
     }
 }
-
+ 
 if (!GM4){
     ghhPrefs = GM_getValue("ghhprefs", "");
     checkprefs();
@@ -277,7 +278,7 @@ if (!GM4){
 } else {
     GM.getValue("ghhprefs", "").then(function(value){ghhPrefs = value; checkprefs(); GHHbDinit();});
 }
-
+ 
 function GHHbDinit(){
     showYN = ghhPrefO.shownotc[0];
     mpopen = ghhPrefO.mngpaneopen[0];
@@ -346,7 +347,7 @@ function GHHbDinit(){
         if (bAJAX == "on") setMutationWatch();
     }
 }
-
+ 
 function setMutationWatch(){
     // Prefer MutationObserver (Firefox 14+) over Mutation Events
     MutOb = (window.MutationObserver) ? window.MutationObserver : window.WebKitMutationObserver;
@@ -384,7 +385,7 @@ var ignoreNodeNames = "|BODY|#text|#comment|INPUT|BUTTON|SCRIPT|LI|A|FORM|";
 var ignoreIds = "|leftnav|leftnavc|foot|ghhtemp|ghhblockform|ghhmanageform|ghhsitelist|ghhpbanlist|rhs|rhscol|";
 var ignoreClass = "|ghhider|ghhdbuttons|ghh1time|";
 var t_ap, t_gimg;
-
+ 
 function checkOlist(e){ // Check for new results // Needed for Baidu
     var el = e.target;
     // Ignore events on some elements
@@ -536,8 +537,15 @@ function hidehits(liels,ovrd){
                 }
                 if (ael){ahref=ael.getAttribute("href"); if(ahref){if (ahref.search(/http|ftp/i)==0 || ahref.indexOf("/interstitial")==0 ||
                                                                        ahref.indexOf("/url?q=")==0 || ahref.indexOf(currentG+"/url?q=")>-1 || ahref.indexOf("/url?sa=")==0 ||
-                                                                       (ahref.indexOf("/aclk?")==0 && liels[i].classList.contains("psli"))
-                                                                       || ahref.indexOf("//r.search.yahoo")==0 || ahref.indexOf(currentG+"/link?url=")>-1){
+                                                                       (ahref.indexOf("/aclk?")==0 && liels[i].classList.contains("psli")) ||
+                                                                       ahref.indexOf("//r.search.yahoo")==0 || ahref.indexOf(currentG+"/link?url=")>-1 ||
+                                                                       ahref.indexOf('/rebates/welcome') === 0){
+                    if (engine == 'Bing'){ // v2.2.7
+                        if (ahref.indexOf('https://www.bing.com/') === 0 || ahref.indexOf('/rebates/welcome') === 0){
+                            var citeEl = liels[i].querySelector('div:not(.b_algo_group) cite');
+                            if (citeEl) ahref = citeEl.textContent.trim();
+                        }
+                    }
                     dom = ahref.substr(ahref.search(/http|ftp/i));
                     if (ael.hasAttribute("data-href")) dom = ael.getAttribute("data-href").substr(ael.getAttribute("data-href").indexOf("http"));
                     if (dom.indexOf(currentG+"/aclk?")>-1) dom = ahref.substr(ahref.indexOf("http", 10));
@@ -1121,7 +1129,7 @@ function addBlockForm(){
     '<button type="button" id="ghhbf2" mng="N"> ' + txts.cancelbtn[0] + ' </button> ' +
     '<button type="button" id="ghhbf4" mng="Y">' + txts.cancelMbtn[0] + '</button></p>';
 if (engine == 'Google'){
-    bfdcode += "<p style=\"border-top:1px solid #aaa;text-align:center;white-space:pre;line-height:2em;margin:0.75em 0;padding-top:0.5em;\">编辑查询: <button type=\"button\" id=\"ghhbf5\" title=\"仅限此网站\"> +site: </button> " +
+    bfdcode += "<p style=\"border-top:1px solid #aaa;text-align:center;white-space:pre;line-height:2em;margin:0.75em 0;padding-top:0.5em;\">编辑查询： <button type=\"button\" id=\"ghhbf5\" title=\"仅限此网站\"> +site: </button> " +
         "<button type=\"button\" id=\"ghhbf6\" title=\"排除此网站\"> -site: </button></p>";
 }
 bfdcode += "<p style=\"margin:0.75em 0;\"><label title=\"切换显示或隐藏常规屏蔽结果标题\"><input " +
